@@ -1,0 +1,5 @@
+- name: Install Samba package (Fedora)
+  tags: samba,fedora
+  package: 
+    name: samba
+    state: latest

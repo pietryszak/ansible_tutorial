@@ -1,0 +1,4 @@
+- name: Add ssh key for admin
+  authorized_key:
+    user: admin
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEP0Dh4gujpNqCWK0wnthM5zOvwy/vvg/6llZEzFSI3X ansible"
