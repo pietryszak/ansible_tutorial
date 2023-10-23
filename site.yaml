@@ -3,21 +3,32 @@
   become: true
   pre_tasks:
 
-  - name: install updates (Fedora)
+  - name: Update repo cache (Fedora)
     tags: always
     dnf:
-      update_only: true
       update_cache: true
+    changed_when: false
     when: ansible_distribution == "Fedora"
 
-  - name: Install update (Ubuntu)
+  - name: Update repo cache (Ubuntu)
     tags: always
     apt:
-      upgrade: dist
       update_cache: true
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
-  
-      
+
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Add ssh key for admin
+    tags: always
+    authorized_key:
+      user: admin
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEP0Dh4gujpNqCWK0wnthM5zOvwy/vvg/6llZEzFSI3X ansible"
+
+
 - hosts: web_servers
   become: true
   tasks:
@@ -40,7 +51,30 @@
       state: latest
     when: ansible_distribution == "Fedora"
   
-  - name: Copy defaukt html file for site
+  - name: Start httpd (Fedora)
+    tags: apache,httpd,fedora
+    service:
+      name: httpd
+      state: started
+      enabled: true
+    when: ansible_distribution == "Fedora"
+
+  - name: Change e-mail adress for admin (Fedora)
+    tags: apache,httpd,fedora
+    lineinfile: 
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin something@somewhere.pl
+    when: ansible_distribution == "Fedora"
+    register: httpd
+
+  - name: Restart httpd (Fedora)
+    tags: apache,httpd,fedora
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
+  - name: Copy default html file for site
     tags: apache, apache, ubuntu
     copy: 
       src: default_site.html
@@ -48,6 +82,7 @@
       owner: root
       group: root
       mode: 0644
+
 
 - hosts: db_servers
   become: true
@@ -67,6 +102,7 @@
       state: latest
     when: ansible_distribution == "Fedora"
 
+      
 - hosts: file_servers
   become: true
   tasks:

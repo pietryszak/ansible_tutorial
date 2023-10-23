@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (Fedora)
+    tags: always
+    dnf:
+      update_only: true
+      update_cache: true
+    when: ansible_distribution == "Fedora"
+
+  - name: Install update (Ubuntu)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: true
+    when: ansible_distribution == "Ubuntu"
+
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Create admin user
+    tags: always
+    user:
+      name: admin
+      groups: root
+  
+  - name: Add ssh key for admin
+    tags: always
+    authorized_key:
+      user: admin
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEP0Dh4gujpNqCWK0wnthM5zOvwy/vvg/6llZEzFSI3X ansible"
+
+  - name: Add sudoers file for admin
+    tags: always
+    copy:
+      src: sudoer_admin
+      dest: /etc/sudoers.d/admin
+      owner: root
+      group: root
+      mode: 0440
