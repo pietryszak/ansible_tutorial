@@ -4,7 +4,7 @@ Copying the public key to vm from the server_list file and running the bootstrap
 
 
 ```bash
-chmod +x copy_ansible_public_key.sh && ./copy_ansible_public_key.sh && ansible-playbook --user=glowny_user --ask-become-pass bootstrap.yaml
+chmod +x copy_ansible_public_key.sh && ./copy_ansible_public_key.sh && ansible-playbook --user=MAIN_USER --ask-become-pass bootstrap.yaml
  ```
 
 Main playbook
