@@ -1,0 +1,4 @@
+apache_package_name: httpd
+php_package_name: php
+ssh_users: pietryszak admin
+ssh_template_file: sshd_config_fedora.j2

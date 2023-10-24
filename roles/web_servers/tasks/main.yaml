@@ -1,28 +1,32 @@
-- hosts: web_servers
-become: true
-tasks:
-
-- name: Install apache2 server package (Ubuntu)
-  tags: apache,apache2,ubuntu
+- name: Install apache and php package (Ubuntu)
+  tags: apache,php,ubuntu
   apt:
-    name: 
-      - apache2
-      - libapache2-mod-php
+    name:
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
   when: ansible_distribution == "Ubuntu"
 
-- name: Install apache2 server package (Fedora)
-  tags: apache,httpd,fedora
+- name: Install apache and php package (Fedora)
+  tags: apache,httpd,php,fedora
   dnf:
-    name: 
-      - httpd
-      - php
+    name:
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
   when: ansible_distribution == "Fedora"
 
-- name: Start httpd (Fedora)
-  tags: apache,httpd,fedora
-  service:
+- name: Start end enable apache service (Ubuntu)
+  tags: apache,ubuntu
+  systemd:
+    name: apache2
+    state: started
+    enabled: true
+  when: ansible_distribution == "Ubuntu"
+
+- name: Start end enable apache service (Fedora)
+  tags: apache,httpd.fedora
+  systemd:
     name: httpd
     state: started
     enabled: true
@@ -33,16 +37,17 @@ tasks:
   lineinfile: 
     path: /etc/httpd/conf/httpd.conf
     regexp: '^ServerAdmin'
-    line: ServerAdmin something@somewhere.pl
+    line: ServerAdmin apache@pietryszak.pl
   when: ansible_distribution == "Fedora"
   register: httpd
 
-- name: Restart httpd (Fedora)
-  tags: apache,httpd,fedora
+- name: Restart httpd
+  tags: apache,httpd
   service:
-    name: httpd
+    name: "{{ apache_service }}"
     state: restarted
   when: httpd.changed
+
 - name: Copy default html file for site
   tags: apache, apache, ubuntu
   copy: 
